@@ -1,4 +1,6 @@
 import streamlit as st
+import time
+import pandas as pd
 
 from fireworks.client import Fireworks
 
@@ -6,7 +8,7 @@ FIREWORKS_API_KEY = st.secrets["FIREWORKS_API_KEY"]
 
 # Show title and description.
 st.title("Llama-Exam-Tests generator for Ukrainian History")
-st.write("Upload a textbook below to generate examp materials")
+st.write("Upload a textbook below to generate exam questions")
 st.write(
     "Slides [click here](https://pitch.com/v/llama-x-ukrainian-education-f3knrk/11309135-0991-4ca5-a799-626cf95c6bd1)"
 )
@@ -186,24 +188,64 @@ else:
                 """,
             }
         ]
+        st.write("=======ENGLISH===========")
+        with st.spinner("Performing task in EN..."):
+            start_time = time.time()
+            response = client.chat.completions.create(
+                model="accounts/fireworks/models/llama-v3p1-8b-instruct",
+                messages=messages_en,
+            )
+            execution_time_en = time.time() - start_time
+            response_tokens_en = response.usage.completion_tokens
+            response_chars_en = len(response.choices[0].message.content)
 
-        # Generate an answer using the OpenAI API.
-        st.write("Performing EN generation")
-        response = client.chat.completions.create(
-            model="accounts/fireworks/models/llama-v3p1-8b-instruct",
-            messages=messages_en,
-        )
+            output_text = response.choices[0].message.content
+            # print(output_text)
+            st.write(output_text)
 
-        output_text = response.choices[0].message.content
-        print(output_text)
-        st.write(output_text)
+        st.write("=======Ukrainian=========")
+        with st.spinner("Performing task in UA..."):
+            start_time = time.time()
+            response = client.chat.completions.create(
+                model="accounts/fireworks/models/llama-v3p1-8b-instruct",
+                messages=messages_ua,
+            )
+            execution_time_ua = time.time() - start_time
+            response_tokens_ua = response.usage.completion_tokens
+            response_chars_ua = len(response.choices[0].message.content)
 
-        st.write("Performing UA generation")
-        response = client.chat.completions.create(
-            model="accounts/fireworks/models/llama-v3p1-8b-instruct",
-            messages=messages_ua,
-        )
+            output_text = response.choices[0].message.content
+            # print(output_text)
+            st.write(output_text)
 
-        output_text = response.choices[0].message.content
-        print(output_text)
-        st.write(output_text)
+        # st.write("=======Inference Stats=========")
+        # df = pd.DataFrame(
+        #     [
+        #         (
+        #             "en",
+        #             response_chars_en,
+        #             # response_chars_en / execution_time_en,
+        #             response_tokens_en,
+        #             # response_tokens_en / execution_time_en,
+        #             response_chars_en / response_tokens_en,
+        #         ),
+        #         (
+        #             "ua",
+        #             response_chars_ua,
+        #             # response_chars_ua / execution_time_ua,
+        #             response_tokens_ua,
+        #             # response_tokens_ua / execution_time_ua,
+        #             response_chars_ua / response_tokens_ua,
+        #         ),
+        #     ],
+        #     columns=[
+        #         "language",
+        #         "chars generated",
+        #         # "chars/s",
+        #         "tokens used",
+        #         # "tok/s",
+        #         "char/tok",
+        #     ],
+        # )
+
+        # st.table(df)
