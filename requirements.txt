@@ -2,3 +2,4 @@ streamlit
 watchdog
 openai
 fireworks-ai
+pandas
